@@ -1,11 +1,13 @@
 news_sites:
-  eluniversal:
-    url: https://www.eluniversal.com.mx
+  caracol:
+    url: https://www.bbc.com
     queries:
-      homepage_article_links: '.field-content a'
-      article_body: '.field-name-body'
-      article_title: '.pane-content h1'
+      homepage_article_links: 'ul li a'
+      article_body: 'div .ssrcss-pv1rh6-ArticleWrapper'
+      article_title: '#main-heading'
   elpais:
-    url: https://elpais.com
+    url: https://colombiareports.com/colombia-news/
     queries: 
-    homepage_article_links:  ''
+      homepage_article_links: '#main div ul li article div h2 a'
+      article_body: 'article'
+      article_title: '.header-standard h1'

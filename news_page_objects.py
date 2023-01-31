@@ -3,11 +3,11 @@ import requests
 from common import config
 
 class NewsPage:
-    def __init__(self, news_site_uid):
+    def __init__(self, news_site_uid, url):
         self._config = config()["news_sites"][news_site_uid] # trae el archivo config de coomon qye a su vez etsa con config .yaml
         self._queries = self._config["queries"] #le da al metodo privado (_queries) las queries que estan en confing de la linea de arriba
         self._html = None
-        self._visit(self._config['url'])
+        self._visit(url)
         
     def _select(self, query_string):
         nodes = self._html.select(query_string)
@@ -24,8 +24,8 @@ class NewsPage:
         self._html = bs4.BeautifulSoup(response.text, "html.parser") # importa el texto de la variable response parseada con bs4  a el metodo _html
 
 class HomePage(NewsPage):    # clase de pagina principal
-    def __init__(self, news_site_uid):
-        super().__init__(news_site_uid)
+    def __init__(self, news_site_uid, url):
+        super().__init__(news_site_uid, url)
         
     @property #def dentro de un def
     def article_links(self):
@@ -37,10 +37,11 @@ class HomePage(NewsPage):    # clase de pagina principal
         return set(link ["href"] for link in link_list) #hace un set (es decir quita los duplicados) queremos la propiedad href por cada link en la lista de links
 
 
+
 class ArticlePage(NewsPage):
 
-    def __init__(self, news_site_uid):
-        super().__init__(news_site_uid)
+    def __init__(self, news_site_uid, url):
+        super().__init__(news_site_uid, url)
     
     @property
     def body(self):
