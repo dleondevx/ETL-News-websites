@@ -3,12 +3,14 @@ import requests
 from common import config
 
 class NewsPage:
-    def __init__(self, news_site_uid, url):
+    def __init__(self, news_site_uid, url, pagination = None):
         self._config = config()["news_sites"][news_site_uid] # trae el archivo config de coomon qye a su vez etsa con config .yaml
         self._queries = self._config["queries"] #le da al metodo privado (_queries) las queries que estan en confing de la linea de arriba
         self._html = None
         self._visit(url)
-        
+        self._url = url
+        self._pagination = self._config['queries']['pagination']
+
     def _select(self, query_string):
         nodes = self._html.select(query_string)
 
@@ -37,7 +39,6 @@ class HomePage(NewsPage):    # clase de pagina principal
         return set(link ["href"] for link in link_list) #hace un set (es decir quita los duplicados) queremos la propiedad href por cada link en la lista de links
 
 
-
 class ArticlePage(NewsPage):
 
     def __init__(self, news_site_uid, url):
@@ -53,3 +54,9 @@ class ArticlePage(NewsPage):
     def title(self):
         result = self._select(self._queries['article_title'])
         return result[0].text if len(result) else ''
+    
+    @property
+    def link(self):
+        result = str(self._url)
+        return result if len(result) else ''
+

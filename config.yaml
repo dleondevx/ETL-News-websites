@@ -5,9 +5,11 @@ news_sites:
       homepage_article_links: 'ul li a'
       article_body: 'div .ssrcss-pv1rh6-ArticleWrapper'
       article_title: '#main-heading'
+      pagination: ''
   elpais:
     url: https://colombiareports.com/colombia-news/
     queries: 
       homepage_article_links: '#main div ul li article div h2 a'
       article_body: 'article'
       article_title: '.header-standard h1'
+      pagination: 'page/'

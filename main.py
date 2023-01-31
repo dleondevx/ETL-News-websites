@@ -15,21 +15,26 @@ logger = logging.getLogger(__name__)
 is_well_formed_link = re.compile(r'^https?://.+/.+$')
 is_root_path = re.compile(r'^/.+$') # some Text
 
-def _news_scraper(news_site_uid):
-    host = config()['news_sites'][news_site_uid]['url']
+def _fetch_article_though_pages(*args,**kwargs):
+    print(*args)
     articles = []
+    news_site_uid, host, = args[0], args[1]
+    for link in args[2].article_links:
+        article = _fetch_article(news_site_uid, host, link)
+        logger.info('Article fetched!!')
+        articles.append(article)
+        print(article.title)
+    return articles
+
+def _news_scraper(news_site_uid, pagination = None):
+    if pagination:
+        host = config()['news_sites'][news_site_uid]['url']+str(pagination) 
+    else:
+        host = config()['news_sites'][news_site_uid]['url']
     logging.info('Beginning scraper for {}'.format(host))
     logging.info('Finding links in homepage...')
-    homepage = news.HomePage(news_site_uid, host)
-
-    for link in homepage.article_links:
-        article = _fetch_article(news_site_uid, host, link)
-
-        if article:
-            logger.info('Article fetched!!')
-            articles.append(article)
-            print(article.title)
-            
+    homepage = news.HomePage(news_site_uid, host)  
+    articles = _fetch_article_though_pages(news_site_uid,host,homepage)
     _save_articles(news_site_uid, articles)
 
 
@@ -53,6 +58,7 @@ def _fetch_article(news_site_uid, host, link):
     article = None
     try:
         article = news.ArticlePage(news_site_uid, _build_link(host,link))
+        print(article.link)
     except (HTTPError, MaxRetryError) as e:
         logger.warning('Error while fechting the article', exc_info=False)
         print(e)
@@ -66,12 +72,13 @@ def _fetch_article(news_site_uid, host, link):
 
 def _save_articles(news_site_uid, articles):
     now = datetime.datetime.now()
-    out_file_name = '{news_site_uid}_{datetime}_articles.csv'.format(
+    out_file_name = '{news_site_uid}_articles.csv'.format(
             news_site_uid=news_site_uid,
             datetime=now)
+
     csv_headers = list(filter(lambda property: not property.startswith('_'), dir(articles[0])))
 
-    with open(out_file_name, mode='w+') as f:
+    with open(out_file_name, mode='a+') as f:
         writer = csv.writer(f)
         writer.writerow(csv_headers)
 
@@ -88,6 +95,17 @@ if __name__ == '__main__':
                         type=str,
                         choices=news_site_choices)
 
+    
     args = parser.parse_args()
-    _news_scraper(args.news_site)
+    host = args.news_site 
 
+    if True:
+        pagination = 'page/'
+        for i in range(1,150):
+            if i != 1:
+                _news_scraper(host, pagination+str(i)+'/')
+            else:
+                _news_scraper(host)
+
+    else:
+        _news_scraper(args.news_site)
